@@ -1,0 +1,11 @@
+#! /bin/bash
+while true
+do
+lastlg=$(xset -q | grep LED | cut -c63)    
+sleep 0.05s
+newlg=$(xset -q | grep LED | cut -c63)
+if [[ $lastlg -ne $newlg ]]
+then
+tmux refresh-client -S
+fi
+done
