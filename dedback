@@ -46,27 +46,34 @@ esac
 shift
 done
 
-if [ "$flagr" = "run" ]
-then
-    if [ -n "$file" ]
-    then 
-        addon="$addon; ./$file"
-    else
-        addon="$addon; ./a.out"
-    fi
-fi
-
-if [ "$flagf" = "del" ]
-then
-    if [ -n "$file" ]
-    then
-        addon="$addon; rm $file"
-    else
-        addon="$addon; rm ./a.out"
-    fi
-fi
-
 eval $comrade $addon
+
+addon=""
+if [ -f "a.out" ] || [ -f "$file" ]
+then
+    if [ "$flagr" = "run" ]
+    then
+        if [ -n "$file" ]
+        then 
+            addon="./$file"
+        else
+            addon="./a.out"
+        fi
+    fi
+
+    if [ "$flagf" = "del" ]
+    then
+        if [ -n "$file" ]
+        then
+            addon="$addon; rm $file"
+        else
+            addon="$addon; rm ./a.out"
+        fi
+    fi
+fi
+
+
+eval $addon
 
 
 
