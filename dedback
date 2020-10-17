@@ -50,8 +50,19 @@ esac
 shift
 done
 
+if [ "$flagh" = help ] 
+then 
+    echo "      You desire to acquire the wisdom of ded        "
+    echo
+    echo "-a) Add anything you want to the commands which script will be calling. Use with caution"
+    echo "-c) With this key object file will not be executed after compilation"
+    echo "-h) Summon ded's help"
+    echo "-o) Specify name of the object file. Note that without this key default object file will be deleted"
+    echo 
+    echo "Any string not precedent by "-a" or "-o" keys will be considered as a file to compile"
+    echo "File to compile cannot be named after usage of "-o""
+else    
 eval $comrade $addon
-
 addon=""
 if [ -f "a.out" ] || [ -f "$file" ]
 then
@@ -74,7 +85,7 @@ then
         fi
     fi
 fi
-
+fi
 eval $addon
 
 
