@@ -10,6 +10,7 @@ flagr="run"
 flagf="del"
 file=""
 begflag="beg"
+flagh="nohelp"
 echo compiling...
 echo ---------------------------------------------------------------------------------------------------
 
@@ -28,6 +29,9 @@ do
           file="$1"
           flagf="nodel"
           begflag="notbeg"
+    ;;
+
+    "-h") flagh="help"
     ;;
 
     *)  if [ "$begflag" = "beg" ]
@@ -55,23 +59,21 @@ then
     then
         if [ -n "$file" ]
         then 
-            addon="./$file"
+            addon="./$file; "
         else
-            addon="./a.out"
+            addon="./a.out; "
         fi
     fi
-
     if [ "$flagf" = "del" ]
     then
         if [ -n "$file" ]
         then
-            addon="$addon; rm $file"
+            addon="$addon rm $file"
         else
-            addon="$addon; rm ./a.out"
+            addon="$addon rm ./a.out"
         fi
     fi
 fi
-
 
 eval $addon
 
