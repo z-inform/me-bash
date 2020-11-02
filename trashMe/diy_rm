@@ -1,0 +1,9 @@
+#! /bin/sh
+
+while [ -n "$1" ]
+do
+    realpath $1 >> /home/$USER/.trash/dataDir/goopData
+    mv $1 /home/$USER/.trash/
+    shift
+done
+
