@@ -1,9 +1,13 @@
 #! /bin/sh
-
 while [ -n "$1" ]
 do
-    realpath $1 >> /home/$USER/.trash/dataDir/goopData
-    mv $1 /home/$USER/.trash/
+    if [ -e "$1" ]
+    then
+        realpath $1 >> /home/$USER/.trash/dataDir/goopData
+        mv $1 /home/$USER/.trash/
+    else
+        echo "Skipping $1. No such file or directory"
+    fi
     shift
 done
 

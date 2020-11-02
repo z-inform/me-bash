@@ -39,6 +39,7 @@ then
             if ! [ -e "$file" ]
             then
                 sed -i "/$file/d" ./dataDir/goopData
+                echo "Restored $(eval "grep $file ./dataDir/goopData")"
             fi
         fi 
     done 
@@ -46,9 +47,10 @@ then
 else
 while [ -n "$1" ]
 do
-    eval "mv -T $1 \$(grep $1 ./dataDir/goopData)"
+    eval "mv -T $1 \$(grep -m 1 $1 ./dataDir/goopData)"
     if ! [ -e "$1" ]
     then
+        echo "Restored $(eval "grep $1 ./dataDir/goopData")"
         sed -i "/$1/d" ./dataDir/goopData
     fi
     shift
