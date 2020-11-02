@@ -1,0 +1,50 @@
+#! /bin/sh
+
+if [ "$1" = "--deleted" ] || [ "$1" = "-d" ]
+then 
+    cat /home/$USER/.trash/dataDir/goopData
+else
+if [ "$1" = "--local-deleted" ] || [ "$1" = "-l" ] 
+then 
+    pat=$(eval "realpath ./")
+    papat="$pat/"
+    for str in $(eval "grep "$pat" /home/$USER/.trash/dataDir/goopData") 
+    do 
+        echo ${str##$papat}
+    done 
+else 
+
+cd /home/$USER/.trash
+
+if [ "$1" = "--undo" ] || [ "$1" = "-u" ]
+then
+    shift
+    secs=$(($1*60))
+    for file in $(ls -p1 | grep -v /)
+    do
+        if [ $(($(eval "date +%s") - $(eval "stat $file -c %Z"))) -le $secs ]
+        then 
+            eval "mv -T $file \$(grep $file ./dataDir/goopData)"
+            if ! [ -e "$file" ]
+            then
+                sed -i "/$file/d" ./dataDir/goopData
+            fi
+        fi 
+    done 
+
+else
+while [ -n "$1" ]
+do
+    eval "mv -T $1 \$(grep $1 ./dataDir/goopData)"
+    if ! [ -e "$1" ]
+    then
+        sed -i "/$1/d" ./dataDir/goopData
+    fi
+    shift
+done
+
+fi
+
+fi
+
+fi
