@@ -1,5 +1,16 @@
 #! /bin/sh
 
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]
+then 
+    echo This restores files from /home/\$USER/.trash based on data in ~/.trash/dataDir/goopData
+    echo ---------------------------------------------------------------------------------------
+    echo "-h or --help \t \t   summons help"
+    echo "-d or --deleted \t   to show all contents of the bin with full paths"
+    echo "-l or --deleted-local \t   to show all files in the bin that were deleted from currend directory"
+    echo "--undo or -d TIME \t   undo all deletions during the last TIME minutes"
+    echo "FILE \t                   to undo deletion of the FILE. It will be returned to the directory it was deleted from"
+    echo ---------------------------------------------------------------------------------------
+else
 if [ "$1" = "--deleted" ] || [ "$1" = "-d" ]
 then 
     cat /home/$USER/.trash/dataDir/goopData
@@ -42,6 +53,8 @@ do
     fi
     shift
 done
+
+fi
 
 fi
 
