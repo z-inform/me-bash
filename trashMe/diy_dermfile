@@ -54,7 +54,7 @@ case $1 in
 
     "-c"|"--clear")
         shift
-        while [-n "$1" ]
+        while [ -n "$1" ]
         do
             cd /home/$USER/.trash 
             rm ./$1
