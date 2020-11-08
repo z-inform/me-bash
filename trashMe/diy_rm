@@ -1,5 +1,5 @@
 #! /bin/sh
-if ![ -e "/home/$USER/.trash/dataDir/goopData" ]
+if ! [ -e "/home/$USER/.trash/dataDir/goopData" ]
 then
     mkdir -p /home/$USER/.trash/dataDir
     touch /home/$USER/.trash/dataDir/goopData
