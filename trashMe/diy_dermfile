@@ -25,10 +25,14 @@ case $1 in
 
     "--local-deleted"|"-l")
         pat=$(eval "realpath ./")
-        papat="$pat/"
+        slashpat="$pat/"
         for str in $(eval "grep "$pat" /home/$USER/.trash/dataDir/goopData") 
         do 
-            echo ${str##$papat}
+            filepat=${str##$slashpat}
+            if [ -z "$(eval echo $filepat |  grep "/" )" ]
+            then 
+                echo $filepat
+            fi
         done 
         shift
     ;;
