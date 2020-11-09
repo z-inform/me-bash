@@ -7,12 +7,13 @@ fi
 
 while [ -n "$1" ]
 do
-    if [ -e "$1" ]
+    file=$( echo $1 | sed 's| |\ |g') 
+    if [ -e "$file" ]
     then
-        realpath $1 >> /home/$USER/.trash/dataDir/goopData
-        mv $1 /home/$USER/.trash/
+        realpath "$file" >> /home/$USER/.trash/dataDir/goopData
+        mv "$file" /home/$USER/.trash/
     else
-        echo "Skipping $1. No such file or directory"
+        echo "Skipping $file. No such file or directory"
     fi
     shift
 done
