@@ -9,7 +9,7 @@ while [ -n "$1" ]
 do
     if [ -e "$1" ]
     then
-        if [ "$(eval echo "$1" | grep -c '[ \\!?)([<>%$*]\|]')" != "0" ]
+        if [ "$(eval echo "$1" | grep -c '[ \\!?)([<>%$*-,;=^`|.:]\|]')" != "0" ]
         then
             file="'$1'"
         else 
