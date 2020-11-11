@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 if ! [ -e "/home/$USER/.trash/dataDir/goopData" ]
 then
     mkdir -p /home/$USER/.trash/dataDir
@@ -7,13 +7,18 @@ fi
 
 while [ -n "$1" ]
 do
-    file=$( echo $1 | sed 's| |\ |g') 
-    if [ -e "$file" ]
+    if [ -e "$1" ]
     then
+        if [ "$(eval echo "$1" | grep -c '[ \\!?)([<>%$*]\|]')" != "0" ]
+        then
+            file="'$1'"
+        else 
+            file=$1
+        fi
         realpath "$file" >> /home/$USER/.trash/dataDir/goopData
-        mv "$file" /home/$USER/.trash/
+        mv "$1" /home/$USER/.trash/
     else
-        echo "Skipping $file. No such file or directory"
+        echo "Skipping $1. No such file or directory"
     fi
     shift
 done
