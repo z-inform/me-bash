@@ -11,7 +11,8 @@ do
     then
         if [ "$(eval echo "$1" | grep -c '[ \\!?)([<>%$*-,;=^`|.:]\|]')" != "0" ]
         then
-            file="'$1'"
+            file=$(eval echo "$1" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')
+            #file=$(eval echo "$file" | sed 's|]|\\]|g')
         else 
             file=$1
         fi
