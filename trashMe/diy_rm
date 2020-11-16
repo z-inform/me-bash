@@ -9,12 +9,7 @@ while [ -n "$1" ]
 do
     if [ -e "$1" ]
     then
-        if [ "$(eval grep -c "'[ \\\\!?)([<>%\$\*-,;=^\`|.:]'" <<< "$1")" != "0" ]
-        then
-            file=$(eval sed "'s|[ \\\\\\!?)([<>%\$*-,;=^\`|.:]|\\\\&|g'" <<< "$1")
-        else 
-            file=$1
-        fi
+        file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
         realpath "$file" >> /home/$USER/.trash/dataDir/goopData
         mv "$1" /home/$USER/.trash/
         echo "$file moved to bin"
