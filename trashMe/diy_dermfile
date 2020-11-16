@@ -6,7 +6,7 @@ do
 case $1 in 
 
     "--help"|"-h")
-        echo "This restores files from /home/$USER/.trash based on data in ~/.trash/dataDir/goopData"
+        echo "This restores files from /home/$USER/.trash based on data in /home/$USER/.trash/dataDir/goopData"
         echo ---------------------------------------------------------------------------------------
         echo -e "--help or -h \t \t   summons help"
         echo -e "--deleted or -d \t   to show all contents of the bin with full paths"
@@ -39,21 +39,25 @@ case $1 in
         cd /home/$USER/.trash
         shift
         secs=$(($1*60))
-        for file in $(ls -p1 | grep -v /)
+        for somefile in $(ls -p1 | grep -v /)
         do
-            if [ $(($(eval "date +%s") - $(eval "stat \"$file\" -c %Z"))) -le $secs ]
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$somefile")
+            if [ $(($(eval "date +%s") - $(eval stat "$file" -c %Z))) -le $secs ]
             then 
-                file=$(eval echo "$1" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')
-                doublefile="$(eval echo \"$file\" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')"
-                greppath=$(grep -m 1 $doublefile ./dataDir/goopData)
-                actualpath=$(eval echo \"$greppath\" | sed 's|\\\\|\\|g')
-                eval "mv -T $file $actualpath"
-                if ! [ -e "$1" ]
+                fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+                pathToFile=$(eval grep -m 1 "'$fileForGrep'" ./dataDir/goopData)
+                if [ -n "$pathToFile" ]
                 then
-                    echo "Restored $actualpath"
-                    sed -i "/$doublefile/d" ./dataDir/goopData
+                    eval "mv -T $file $pathToFile"
+                    if ! [ -e "$1" ]
+                    then
+                        echo "Restored $pathToFile"
+                        sed -i "/$fileForGrep/d" ./dataDir/goopData
+                    fi
+                else 
+                    echo "$file is not in the bin"
                 fi
-            fi 
+           fi 
         done 
         shift
     ;;
@@ -63,10 +67,10 @@ case $1 in
         while [ -n "$1" ]
         do
             cd /home/$USER/.trash 
-            file=$(eval echo "$1" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')
-            doublefile="$(eval echo \"$file\" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')"
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+            fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
             rm ./$file
-            sed -i "/$doublefile/d" ./dataDir/goopData
+            sed -i "/$fileForGrep/d" ./dataDir/goopData
             echo "$file deleted forever"
             shift
         done
@@ -75,13 +79,21 @@ case $1 in
     "-m"|"--move-here")
         shift
         pat=$(eval "realpath ./")
+        escpath=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$pat")      
         while [ -n "$1" ]
         do
-            eval "mv /home/$USER/.trash/$1 $pat"
-            if ! [ -e "/home/$USER/.trash/$1" ]
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+            fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+            if [ -e "/home/$USER/.trash/$1" ] 
             then
-                echo "Restored $1 to this directory"
-                sed -i "/$1/d" /home/$USER/.trash/dataDir/goopData
+                eval "mv /home/$USER/.trash/$file $escpath/"
+                if ! [ -e "/home/$USER/.trash/$file" ]
+                then
+                    echo "Restored $file to this directory"
+                    sed -i "/$fileForGrep/d" /home/$USER/.trash/dataDir/goopData
+                fi
+            else 
+                echo "$file is not in the bin"
             fi
             shift
         done
@@ -89,17 +101,16 @@ case $1 in
 
     *)
         cd /home/$USER/.trash
-        file=$(eval echo "$1" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')
-        doublefile="$(eval echo \"$file\" | sed 's|[ \!?)([<>%$*-,;=^`|.:]|\\&|g')"
-        greppath=$(grep -m 1 $doublefile ./dataDir/goopData)
-        if [ -n "$greppath" ]
+        file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+        fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+        pathToFile=$(eval grep -m 1 "'$fileForGrep'" ./dataDir/goopData)
+        if [ -n "$pathToFile" ]
         then
-            actualpath=$(eval echo \"$greppath\" | sed 's|\\\\|\\|g')
-            eval "mv -T $file $actualpath"
+            eval "mv -T $file $pathToFile"
             if ! [ -e "$1" ]
             then
-                echo "Restored $actualpath"
-                sed -i "/$doublefile/d" ./dataDir/goopData
+                echo "Restored $pathToFile"
+                sed -i "/$fileForGrep/d" ./dataDir/goopData
             fi
         else 
             echo "$file is not in the bin"
