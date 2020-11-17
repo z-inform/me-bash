@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 if ! [ -e "/home/$USER/.trash/dataDir/goopData" ]
 then
     mkdir -p /home/$USER/.trash/dataDir
@@ -9,8 +9,10 @@ while [ -n "$1" ]
 do
     if [ -e "$1" ]
     then
-        realpath $1 >> /home/$USER/.trash/dataDir/goopData
-        mv $1 /home/$USER/.trash/
+        file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+        realpath "$file" >> /home/$USER/.trash/dataDir/goopData
+        mv "$1" /home/$USER/.trash/
+        echo "$file moved to bin"
     else
         echo "Skipping $1. No such file or directory"
     fi

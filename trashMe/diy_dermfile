@@ -1,19 +1,20 @@
-#! /bin/sh
+#! /bin/bash
+IFS=$'\n'
 
 while [ -n "$1" ]
 do
 case $1 in 
 
     "--help"|"-h")
-        echo This restores files from /home/\$USER/.trash based on data in ~/.trash/dataDir/goopData
+        echo "This restores files from /home/$USER/.trash based on data in /home/$USER/.trash/dataDir/goopData"
         echo ---------------------------------------------------------------------------------------
-        echo "--help or -h \t \t   summons help"
-        echo "--deleted or -d \t   to show all contents of the bin with full paths"
-        echo "--deleted-local or -l  \t   to show all files in the bin that were deleted from currend directory"
-        echo "--undo or -u TIME \t   undo all deletions during the last TIME minutes"
-        echo "--clear or -c FILE.. \t   to remove files from the bin"
-        echo "--move-here or -m FILE..   to restore files to the current directory"
-        echo "FILE \t                   to undo deletion of the FILE. It will be returned to the directory it was deleted from"
+        echo -e "--help or -h \t \t   summons help"
+        echo -e "--deleted or -d \t   to show all contents of the bin with full paths"
+        echo -e "--deleted-local or -l  \t   to show all files in the bin that were deleted from currend directory"
+        echo -e "--undo or -u TIME \t   undo all deletions during the last TIME minutes"
+        echo -e "--clear or -c FILE.. \t   to remove files from the bin"
+        echo -e "--move-here or -m FILE..   to restore files to the current directory"
+        echo -e "FILE \t                   to undo deletion of the FILE. It will be returned to the directory it was deleted from"
         echo ---------------------------------------------------------------------------------------
         shift
     ;;
@@ -41,17 +42,25 @@ case $1 in
         cd /home/$USER/.trash
         shift
         secs=$(($1*60))
-        for file in $(ls -p1 | grep -v /)
+        for somefile in $(ls -p1 | grep -v /)
         do
-            if [ $(($(eval "date +%s") - $(eval "stat $file -c %Z"))) -le $secs ]
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$somefile")
+            if [ $(($(eval "date +%s") - $(eval stat "$file" -c %Z))) -le $secs ]
             then 
-                eval "mv -T $file \$(grep $file ./dataDir/goopData)"
-                if ! [ -e "$file" ]
+                fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+                pathToFile=$(eval grep -m 1 "'$fileForGrep'" ./dataDir/goopData)
+                if [ -n "$pathToFile" ]
                 then
-                    sed -i "/$file/d" ./dataDir/goopData
-                    echo "Restored $(eval "grep $file ./dataDir/goopData")"
+                    eval "mv -T $file $pathToFile"
+                    if ! [ -e "$1" ]
+                    then
+                        echo "Restored $pathToFile"
+                        sed -i "/$fileForGrep/d" ./dataDir/goopData
+                    fi
+                else 
+                    echo "$file is not in the bin"
                 fi
-            fi 
+           fi 
         done 
         shift
     ;;
@@ -61,8 +70,11 @@ case $1 in
         while [ -n "$1" ]
         do
             cd /home/$USER/.trash 
-            rm ./$1
-            sed -i "/$1/d" ./dataDir/goopData
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+            fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+            rm ./$file
+            sed -i "/$fileForGrep/d" ./dataDir/goopData
+            echo "$file deleted forever"
             shift
         done
     ;;        
@@ -70,13 +82,21 @@ case $1 in
     "-m"|"--move-here")
         shift
         pat=$(eval "realpath ./")
+        escpath=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$pat")      
         while [ -n "$1" ]
         do
-            eval "mv /home/$USER/.trash/$1 $pat"
-            if ! [ -e "/home/$USER/.trash/$1" ]
+            file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+            fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+            if [ -e "/home/$USER/.trash/$1" ] 
             then
-                sed -i "/$1/d" /home/$USER/.trash/dataDir/goopData
-                echo "Restored $1 to this directory"
+                eval "mv /home/$USER/.trash/$file $escpath/"
+                if ! [ -e "/home/$USER/.trash/$file" ]
+                then
+                    echo "Restored $file to this directory"
+                    sed -i "/$fileForGrep/d" /home/$USER/.trash/dataDir/goopData
+                fi
+            else 
+                echo "$file is not in the bin"
             fi
             shift
         done
@@ -84,11 +104,19 @@ case $1 in
 
     *)
         cd /home/$USER/.trash
-        eval "mv -T $1 \$(grep -m 1 $1 ./dataDir/goopData)"
-        if ! [ -e "$1" ]
+        file=$(eval sed "'s|[^[:alnum:]]|\\\&|g'" <<< "$1")
+        fileForGrep=$(eval sed "'s|\\\\|\\\\\\\|g'" <<< "$file")
+        pathToFile=$(eval grep -m 1 "'$fileForGrep'" ./dataDir/goopData)
+        if [ -n "$pathToFile" ]
         then
-            echo "Restored $(eval "grep $1 ./dataDir/goopData")"
-            sed -i "/$1/d" ./dataDir/goopData
+            eval "mv -T $file $pathToFile"
+            if ! [ -e "$1" ]
+            then
+                echo "Restored $pathToFile"
+                sed -i "/$fileForGrep/d" ./dataDir/goopData
+            fi
+        else 
+            echo "$file is not in the bin"
         fi
         shift
     ;;
